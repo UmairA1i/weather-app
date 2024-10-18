@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .input-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+button {
+    padding: 0.7rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 30px; /* More rounded */
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+input {
+    border-radius: 20px;
+    padding: 0.7rem;
+    width: 200px;
+}
+
+
+       
+
+.weather-info {
+            margin-top: 1rem;
+        }
+
+.weather-info p {
+            margin: 0.5rem 0;
+        }
+
+.weather-info h2 {
+            color: #007BFF;
+        }
+
+#weatherIcon {
+            width: 100px;
+            height: 100px;
+            margin-top: 1rem;
+            display: none;
+            transform: translateX(120px);
+        }
+
+body.clear-sky {
+    background-color: #87CEEB; /* Blue for clear sky */
+
+}
+
+body.rain {
+    background-color: #9e9e9e; /* Gray for rain */
+}
+
+body.clouds {
+    background-color: #696969; /* Light gray for cloudy */
+}
+
+
+body.snow {
+    background-color: #046eaf; /* Light blue for snow */
+}
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Weather App</h1>
+        <div class="input-container">
+            <input type="text" id="city" placeholder="Enter City Name" required>
+            <button id="getWeatherBtn">Get Weather</button>
+        </div>
+        <div class="weather-info">
+            <h2 id="cityName"></h2>
+            <img id="weatherIcon" src="" alt="Weather Icon" style="display: none;">
+            <p id="temperature"></p>
+            <p id="feellike"></p>
+            <p id="weatherDescription"></p>
+            <p id="humidity"></p>
+            <p id="pressure"></p>
+            <p id="visibility"></p>
+        </div>
+
+        
+    </div>
+
+    <script>
+        // API details
+const apiKey = '504717ab0c5555f24c88cd498f2b168c';
+const apiUrl = 'https://api.openweathermap.org/data/2.5/weather';
+
+// DOM elements
+const cityInput = document.getElementById('city');
+const getWeatherBtn = document.getElementById('getWeatherBtn');
+const cityName = document.getElementById('cityName');
+const temperature = document.getElementById('temperature');
+const feellike = document.getElementById('feellike');
+const weatherDescription = document.getElementById('weatherDescription');
+const humidity = document.getElementById('humidity');
+const weatherIcon = document.getElementById('weatherIcon');
+const pressure = document.getElementById('pressure');
+const visibility = document.getElementById('visibility');
+
+// Fetch weather data
+const getWeather = async (city) => {
+    try {
+        const response = await fetch(`${apiUrl}?q=${city}&appid=${apiKey}&units=metric`);
+        const data = await response.json();
+        console.log(data);
+
+        if (data.cod === 200) {
+            displayWeather(data);
+        } else {
+            cityName.textContent = 'City not found';
+            temperature.textContent = '';
+            feellike.textContent = '';
+            weatherDescription.textContent = '';
+            humidity.textContent = '';
+            pressure.textContent = '';
+            visibility.textContent = '';
+            weatherIcon.style.display = 'none';
+        }
+    } catch (error) {
+        console.error("Error fetching the weather data", error);
+    }
+};
+
+// Display weather data
+const displayWeather = (data) => {
+    cityName.textContent = `Weather in ${data.name}, ${data.sys.country}`;
+    temperature.textContent = `Temperature: ${data.main.temp}°C`;
+    feellike.textContent = `Feels like: ${data.main.feels_like}°C`;
+    weatherDescription.textContent = `Condition: ${data.weather[0].description}`;
+    humidity.textContent = `Humidity: ${data.main.humidity}%`;
+
+    const weatherMain = data.weather[0].main.toLowerCase();
+    document.body.className = ''; // Clear previous class
+    if (weatherMain.includes('clear')) {
+        document.body.classList.add('clear-sky');
+    } else if (weatherMain.includes('rain')) {
+        document.body.classList.add('rain');
+    } else if (weatherMain.includes('cloud')) {
+        document.body.classList.add('clouds');
+    }else if (weatherMain.includes('snow')) {
+        document.body.classList.add('snow');
+    }
+
+    const iconCode = data.weather[0].icon;
+    weatherIcon.src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+    weatherIcon.style.display = 'flex';
+
+    pressure.textContent = `Pressure: ${data.main.pressure} hPa`;
+    visibility.textContent = `Visibility: ${data.visibility / 1000} km`;
+};
+
+
+// Event listener for the button
+getWeatherBtn.addEventListener('click', () => {
+    const city = cityInput.value.trim();
+    if (city) {
+        getWeather(city);
+    }
+});
+
+
+    </script>
+</body>
+
+</html>
